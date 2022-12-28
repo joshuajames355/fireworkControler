@@ -12,7 +12,7 @@ export function ActionGrid(props: ActionGridProps) {
         <Paper
             variant="outlined"
             elevation={8}
-            sx={{ paddingX: 2, paddingY: 2, marginY: 2 }}
+            sx={{ paddingX: 2, paddingY: 2, marginY: 2, marginX: 2 }}
         >
             <Typography component="div" variant="h4">
                 {props.actionSet.name}
@@ -22,7 +22,12 @@ export function ActionGrid(props: ActionGridProps) {
                 {props.actionSet.actionGroups.map((group: ActionGroup) => {
                     return (
                         <Grid item key={group.name}>
-                            <ActionCard actionGroup={group} onFire={() => {fireActionGroup(group)}} />
+                            <ActionCard
+                                actionGroup={group}
+                                onFire={() => {
+                                    fireActionGroup(group);
+                                }}
+                            />
                         </Grid>
                     );
                 })}
