@@ -16,7 +16,7 @@ export const makeAction = (name: string, channel: number): Action => {
 export interface TimedAction {
     type: "TimedAction";
     action: Action;
-    delayMs: Number;
+    delayMs: number;
 }
 
 export const addDelay = (action: Action, delayMs: number): TimedAction => {

@@ -1,4 +1,4 @@
-import { ActionSet, ActionGroup } from "../actions";
+import { ActionSet, ActionGroup, fireActionGroup } from "../actions";
 import { Grid, Paper, Typography, Divider } from "@mui/material";
 import React from "react";
 import { ActionCard } from "./actionCard";
@@ -22,7 +22,7 @@ export function ActionGrid(props: ActionGridProps) {
                 {props.actionSet.actionGroups.map((group: ActionGroup) => {
                     return (
                         <Grid item key={group.name}>
-                            <ActionCard actionGroup={group} onFire={() => {}} />
+                            <ActionCard actionGroup={group} onFire={() => {fireActionGroup(group)}} />
                         </Grid>
                     );
                 })}

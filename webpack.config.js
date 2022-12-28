@@ -25,4 +25,7 @@ module.exports = {
       { test: /\.([cm]?ts|tsx)$/, loader: "ts-loader" },
     ],
   },
+  externals: {
+    serialport: "commonjs2 serialport"
+ },
 };

@@ -29,6 +29,7 @@ export function ActionCard(props: ActionCardProps) {
                     variant="contained"
                     endIcon={<RocketLaunchIcon />}
                     size="large"
+                    onClick={props.onFire}
                 >
                     Fire
                 </Button>
