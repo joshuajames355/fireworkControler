@@ -1,9 +1,12 @@
 module.exports = {
   mode: "development",
   devtool: "inline-source-map",
-  entry: "./src/main.ts",
+  entry: {
+    main: "./src/main.ts",
+    renderer: "./src/renderer.tsx",
+  },
   output: {
-    filename: "main.js",
+    filename: "[name].js",
   },
   target: "electron-main",
   resolve: {
