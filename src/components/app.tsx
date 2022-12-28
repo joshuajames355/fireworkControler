@@ -1,10 +1,13 @@
 import * as React from "react";
-import Button from "@mui/material/Button";
+import { ActionGrid } from "./actionGrid";
+import { MY_ACTION_SETS, ActionSet } from "../actions";
 
 export function App() {
-  return (
-    <div>
-      <Button variant="contained">Hello World</Button>
-    </div>
-  );
+    return (
+        <div>
+            {MY_ACTION_SETS.map((set: ActionSet) => (
+                <ActionGrid actionSet={set} />
+            ))}
+        </div>
+    );
 }
