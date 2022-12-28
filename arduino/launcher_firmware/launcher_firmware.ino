@@ -92,10 +92,6 @@ void sendMsg(bool isValid){
   Serial.write(msg);
 }
 
-//true if has odd parity, false otherwise
-bool checkParity(uint8_t x){
-  x ^= x >> 4;
-  x ^= x >> 2;
-  x ^= x >> 1;
-  return x & 1;
+bool checkParity(uint8_t data[4]){
+  return (data[0] ^ data[1] ^ data[2] ^ data[3]) == 0;
 }
