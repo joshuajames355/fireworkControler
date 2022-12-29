@@ -1,26 +1,32 @@
-import { sendMessage } from "./serial";
+import { SerialAdapter } from "./serial";
 import { Action, ActionGroup } from "./types";
 
-export function fireAction(action: Action) {
-    fireChannel(action.channel);
+export function fireAction(action: Action, serial: SerialAdapter) {
+    fireChannel(action.channel, serial);
 }
 
-export function fireActionGroup(actionGroup: ActionGroup) {
+export function fireActionGroup(
+    actionGroup: ActionGroup,
+    serial: SerialAdapter
+) {
     actionGroup.actions.forEach((element) => {
         if (element.type == "TimedAction") {
-            setTimeout(() => fireAction(element.action), element.delayMs);
+            setTimeout(
+                () => fireAction(element.action, serial),
+                element.delayMs
+            );
         } else if (element.type == "Action") {
-            fireAction(element);
+            fireAction(element, serial);
         }
     });
 }
 
-function fireChannel(channel: number) {
+function fireChannel(channel: number, serial: SerialAdapter) {
     if (channel < 0 || channel > 15) {
         return false;
     }
 
-    sendMessage(4, channel);
+    serial.sendMessage(4, channel);
 
     return true;
 }

@@ -1,32 +1,100 @@
 import { SerialPort } from "serialport";
 
-const port = new SerialPort({ baudRate: 9600, path: "test" });
+const HEARTBEAT_INTERVAL = 5000;
+export class SerialAdapter {
+    port: SerialPort;
 
-let lastMessage: Buffer | undefined = undefined;
-let retryAttempts: number = 0;
+    lastMessage: Buffer | undefined = undefined;
+    retryAttempts: number = 0;
 
-export function sendMessage(type: number, channel: number = 1) {
-    let parity = type ^ channel;
-    lastMessage = Buffer.from([type, channel, parity, 0]);
-    retryAttempts = 0;
-    port.write(lastMessage);
-}
+    heartbeatStartTimer: NodeJS.Timeout | undefined;
+    heartbeatEndTimer: NodeJS.Timeout | undefined;
 
-port.on("readable", function () {
-    let data = port.read();
-    if ((data & 1) == 0) {
-        //error
-        retryAttempts += 1;
-        console.error(
-            "Failed to send message " +
-                lastMessage?.toJSON() +
-                " " +
-                retryAttempts.toString +
-                " times"
-        );
+    connectionStatus: boolean = false;
+    onConnectionStatusChange?: () => void;
+    onAck?: () => void;
+    onError?: () => void;
 
-        if (retryAttempts < 5) {
-            port.write(data);
+    constructor(
+        onConnectionStatusChange: () => void,
+        onAck: () => void,
+        onError: () => void
+    ) {
+        this.port = new SerialPort({ baudRate: 9600, path: "test" });
+        this.onConnectionStatusChange = onConnectionStatusChange;
+        this.onAck = onAck;
+        this.onError = onError;
+
+        this.port.on("open", () => {
+            this.sendHeartbeat();
+        });
+
+        this.port.on("error", (error) => {
+            this.setConnectionStatus(false);
+            this.onError?.();
+            console.error("Serial Error " + error.message);
+        });
+
+        this.port.on("readable", () => {
+            let data = this.port.read();
+            console.log("Received " + data.toString());
+            if ((data & 1) == 0) {
+                //error
+                this.retryAttempts += 1;
+                console.error(
+                    "Failed to send message " +
+                        this.lastMessage?.toString("hex") +
+                        " " +
+                        this.retryAttempts.toString +
+                        " times"
+                );
+
+                if (this.retryAttempts < 5) {
+                    this.port.write(data);
+                } else {
+                    this.setConnectionStatus(false);
+                    this.resetHeartbeat();
+                }
+
+                this.onError?.();
+            } else {
+                this.connectionStatus = true;
+                this.resetHeartbeat();
+                this.onAck?.();
+            }
+        });
+    }
+
+    setConnectionStatus(newStatus: boolean) {
+        if (newStatus != this.connectionStatus) {
+            this.connectionStatus = newStatus;
+            this.onConnectionStatusChange?.();
         }
     }
-});
+
+    sendMessage(type: number, channel: number = 1) {
+        let parity = type ^ channel;
+        this.lastMessage = Buffer.from([type, channel, parity, 0]);
+        this.retryAttempts = 0;
+        this.port.write(this.lastMessage);
+        console.log("Sending " + this.lastMessage.toString("hex"));
+        this.onError?.();
+    }
+
+    sendHeartbeat() {
+        this.sendMessage(1);
+    }
+    resetHeartbeat() {
+        clearTimeout(this.heartbeatStartTimer);
+        this.heartbeatStartTimer = setTimeout(
+            this.sendHeartbeat,
+            HEARTBEAT_INTERVAL
+        );
+
+        clearTimeout(this.heartbeatEndTimer);
+        this.heartbeatEndTimer = setTimeout(() => {
+            this.setConnectionStatus(false);
+            this.resetHeartbeat();
+        }, HEARTBEAT_INTERVAL * 1.5);
+    }
+}

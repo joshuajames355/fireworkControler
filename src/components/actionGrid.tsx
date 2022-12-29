@@ -1,10 +1,11 @@
-import { ActionSet, ActionGroup, fireActionGroup } from "../actions";
+import { ActionSet, ActionGroup } from "../actions";
 import { Grid, Paper, Typography, Divider } from "@mui/material";
 import React from "react";
 import { ActionCard } from "./actionCard";
 
 export interface ActionGridProps {
     actionSet: ActionSet;
+    onFireActionGroup: (actionGroup: ActionGroup) => void;
 }
 
 export function ActionGrid(props: ActionGridProps) {
@@ -24,9 +25,7 @@ export function ActionGrid(props: ActionGridProps) {
                         <Grid item key={group.name}>
                             <ActionCard
                                 actionGroup={group}
-                                onFire={() => {
-                                    fireActionGroup(group);
-                                }}
+                                onFire={() => props.onFireActionGroup(group)}
                             />
                         </Grid>
                     );
