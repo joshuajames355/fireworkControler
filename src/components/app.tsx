@@ -51,9 +51,9 @@ export function App() {
                 isArmed={isArmed}
                 toggleArmStatus={() => {
                     if (isArmed) {
-                        serial.sendMessage(3);
+                        serial.disarm();
                     } else {
-                        serial.sendMessage(2);
+                        serial.arm();
                     }
                 }}
             />
@@ -71,7 +71,7 @@ export function App() {
                 onClose={() => {
                     setSnackBarOpen(false);
                 }}
-                autoHideDuration={6000}
+                autoHideDuration={3000}
                 anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
             >
                 <Alert

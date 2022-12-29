@@ -26,7 +26,7 @@ function fireChannel(channel: number, serial: SerialAdapter) {
         return false;
     }
 
-    serial.sendMessage(4, channel);
+    serial.fireChannel(channel);
 
     return true;
 }
