@@ -14,16 +14,20 @@ export class SerialAdapter {
     onConnectionStatusChange?: () => void;
     onAck?: () => void;
     onError?: () => void;
+    masterArm: boolean = false;
+    onMasterArmChanged?: () => void;
 
     constructor(
-        onConnectionStatusChange: () => void,
-        onAck: () => void,
-        onError: () => void
+        onConnectionStatusChange?: () => void,
+        onAck?: () => void,
+        onError?: () => void,
+        onMasterArmChanged?: () => void
     ) {
         this.port = new SerialPort({ baudRate: 9600, path: "test" });
         this.onConnectionStatusChange = onConnectionStatusChange;
         this.onAck = onAck;
         this.onError = onError;
+        this.onMasterArmChanged = onMasterArmChanged;
 
         this.port.on("open", () => {
             this.sendHeartbeat();
@@ -61,6 +65,12 @@ export class SerialAdapter {
                 this.connectionStatus = true;
                 this.resetHeartbeat();
                 this.onAck?.();
+            }
+
+            var newArmedStatus = (data & 2) > 0;
+            if (newArmedStatus != this.masterArm) {
+                this.masterArm = newArmedStatus;
+                this.onMasterArmChanged?.();
             }
         });
     }

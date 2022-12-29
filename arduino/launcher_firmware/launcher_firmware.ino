@@ -50,18 +50,18 @@ void processMessage(){
     return;
   }
   else if(data[0] == 2){ //arm
-    sendAck();
     digitalWrite(ARM_PIN, HIGH);
+    sendAck();
     return;
   }
   else if(data[0] == 3){ //disarm
-    sendAck();
     digitalWrite(ARM_PIN, LOW);
+    sendAck();
     return;
   }
   else if(data[0] == 4 && data[2] > 0 && data[2] < NUM_CHANNELS){ //fire
-    sendAck();
     digitalWrite(data[2], HIGH);
+    sendAck();
     delay(FIRING_DELAY_MS);
     digitalWrite(data[2], LOW);
     return;

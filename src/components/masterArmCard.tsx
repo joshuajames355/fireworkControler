@@ -8,20 +8,18 @@ import {
 } from "@mui/material";
 import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
 import React from "react";
-import { ActionGroup } from "../actions";
 
-export interface ActionCardProps {
-    actionGroup: ActionGroup;
-    onFire: () => void;
+export interface MasterArmCardProps {
     isArmed: boolean;
+    toggleArmStatus: () => void;
 }
 
-export function ActionCard(props: ActionCardProps) {
+export function MasterArmCard(props: MasterArmCardProps) {
     return (
-        <Card raised={true} sx={{ minWidth: 200 }}>
+        <Card raised={true} sx={{ minWidth: 200, padding: 2, margin: 2 }}>
             <CardContent>
                 <Typography component="div" variant="h5">
-                    {props.actionGroup.name}
+                    Master Arm
                 </Typography>
                 <Divider />
             </CardContent>
@@ -30,10 +28,10 @@ export function ActionCard(props: ActionCardProps) {
                     variant="contained"
                     endIcon={<RocketLaunchIcon />}
                     size="large"
-                    onClick={props.onFire}
-                    disabled={!props.isArmed}
+                    onClick={props.toggleArmStatus}
+                    sx={{ width: 1 }}
                 >
-                    Fire
+                    {props.isArmed ? "Disarm" : "Arm"}
                 </Button>
             </CardActions>
         </Card>

@@ -16,11 +16,13 @@ import {
     CssBaseline,
     Alert,
 } from "@mui/material";
+import { MasterArmCard } from "./masterArmCard";
 
 export function App() {
     let [snackBarOpen, setSnackBarOpen] = React.useState(false);
     let [lastMessageError, setLastMessageError] = React.useState(false);
     let [connectionStatus, setConnectionStatus] = React.useState(false);
+    let [isArmed, setIsArmed] = React.useState(false);
 
     let [serial, _] = React.useState(
         () =>
@@ -35,6 +37,9 @@ export function App() {
                 () => {
                     setLastMessageError(true);
                     setSnackBarOpen(true);
+                },
+                () => {
+                    setIsArmed(serial.masterArm);
                 }
             )
     );
@@ -42,12 +47,23 @@ export function App() {
     return (
         <ThemeProvider theme={THEME}>
             <CssBaseline />
+            <MasterArmCard
+                isArmed={isArmed}
+                toggleArmStatus={() => {
+                    if (isArmed) {
+                        serial.sendMessage(3);
+                    } else {
+                        serial.sendMessage(2);
+                    }
+                }}
+            />
             {MY_ACTION_SETS.map((set: ActionSet) => (
                 <ActionGrid
                     actionSet={set}
                     onFireActionGroup={(actionGroup) =>
                         fireActionGroup(actionGroup, serial)
                     }
+                    isArmed={isArmed}
                 />
             ))}
             <Snackbar
@@ -79,7 +95,7 @@ export function App() {
                 <Toolbar>
                     <Typography>
                         Connection Status:
-                        {connectionStatus ? "Alive" : "Offline"}
+                        {connectionStatus ? " Alive" : " Offline"}
                     </Typography>
                 </Toolbar>
             </AppBar>

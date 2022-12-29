@@ -6,15 +6,12 @@ import { ActionCard } from "./actionCard";
 export interface ActionGridProps {
     actionSet: ActionSet;
     onFireActionGroup: (actionGroup: ActionGroup) => void;
+    isArmed: boolean;
 }
 
 export function ActionGrid(props: ActionGridProps) {
     return (
-        <Paper
-            variant="outlined"
-            elevation={8}
-            sx={{ paddingX: 2, paddingY: 2, marginY: 2, marginX: 2 }}
-        >
+        <Paper variant="elevation" elevation={2} sx={{ padding: 2, margin: 2 }}>
             <Typography component="div" variant="h4">
                 {props.actionSet.name}
             </Typography>
@@ -26,6 +23,7 @@ export function ActionGrid(props: ActionGridProps) {
                             <ActionCard
                                 actionGroup={group}
                                 onFire={() => props.onFireActionGroup(group)}
+                                isArmed={props.isArmed}
                             />
                         </Grid>
                     );
