@@ -10,28 +10,28 @@
 // 3rd bit - 1 for parity error
 // 7th bit - 1 - magic number
 
+const uint8_t NUM_CHANNELS = 16;      // this includes the arm/disarm pin
+const uint8_t FIRING_DELAY_MS = 1500; // the time, in ms, to hold a pin high when firing
+const uint8_t ARM_PIN = 13;
+const uint8_t CHANNEL_MAP[NUM_CHANNELS] = {ARM_PIN, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17}; // first is ARM/DISARM, then the channels in order
+
 uint8_t data[4] = {0, 0, 0, 0};
 uint8_t dataPointer = 0;
-
-const uint8_t NUM_CHANNELS = 16;     // this includes the arm/disarm pin
-const uint8_t FIRING_DELAY_MS = 100; // the time, in ms, to hold a pin high when firing
-const uint8_t ARM_PIN = 13;
-const uint8_t CHANNEL_MAP[NUM_CHANNELS] = {ARM_PIN, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18}; // first is ARM/DISARM, then the channels in order
+unsigned long timeFired[NUM_CHANNELS] = {0};
 
 void setup()
 {
-  // put your setup code here, to run once:
   Serial.begin(9600, SERIAL_8N1);
 
   for (int i = 0; i < NUM_CHANNELS; i++)
   {
-    pinMode(CHANNEL_MAP[0], OUTPUT);
+    pinMode(CHANNEL_MAP[i], OUTPUT);
+    digitalWrite(CHANNEL_MAP[i], HIGH);
   }
 }
 
 void loop()
 {
-  // put your main code here, to run repeatedly:
   while (Serial.available() > 0)
   {
     // read the incoming byte:
@@ -40,9 +40,17 @@ void loop()
     dataPointer += 1;
     if (dataPointer > 3 || new_byte == 0)
     { // process a message
-      if (dataPointer > 2) processMessage(); // the shortest valid message is 3 bytes (when the parity is 0)
+      if (dataPointer > 2)
+        processMessage(); // the shortest valid message is 3 bytes (when the parity is 0)
       dataPointer = 0;
     }
+  }
+
+  unsigned long currentTime = millis();
+  for (int i = 1; i < NUM_CHANNELS; i++)
+  {
+    if (digitalRead(CHANNEL_MAP[i]) == LOW && (timeFired[i] + FIRING_DELAY_MS) < currentTime)
+      digitalWrite(CHANNEL_MAP[i], HIGH);
   }
 }
 
@@ -61,22 +69,21 @@ void processMessage()
   }
   else if (data[0] == 2)
   { // arm
-    digitalWrite(ARM_PIN, HIGH);
+    digitalWrite(ARM_PIN, LOW);
     sendAck();
     return;
   }
   else if (data[0] == 3)
   { // disarm
-    digitalWrite(ARM_PIN, LOW);
+    digitalWrite(ARM_PIN, HIGH);
     sendAck();
     return;
   }
-  else if (data[0] == 4 && data[2] > 0 && data[2] < NUM_CHANNELS)
+  else if (data[0] == 4 && data[1] > 0 && data[1] < NUM_CHANNELS)
   { // fire
-    digitalWrite(data[2], HIGH);
+    digitalWrite(CHANNEL_MAP[data[1]], LOW);
+    timeFired[data[1]] = millis();
     sendAck();
-    delay(FIRING_DELAY_MS);
-    digitalWrite(data[2], LOW);
     return;
   }
 
@@ -106,7 +113,7 @@ void sendMsg(bool isValid, bool isParityValid)
   {
     msg += 1;
   }
-  if (digitalRead(ARM_PIN))
+  if (!digitalRead(ARM_PIN))
   {
     msg += 2;
   }
